@@ -28,7 +28,6 @@ async def async_setup_platform(hass, config, add_devices, discovery_info=None):
     # We want this platform to be setup via discovery
     if discovery_info == None:
         return
-    # TODO CHECK IF ALREADY CONFIGURED FOR WHATEVER REASON
     add_devices([Switch(
 		name=discovery_info.get(CONF_NAME, ""),
         stack=discovery_info.get(CONF_STACK, 0),
@@ -38,7 +37,6 @@ async def async_setup_platform(hass, config, add_devices, discovery_info=None):
 	)])
 
 class Switch(SwitchEntity):
-    """Sequent Microsystems HomeAutomation Switch"""
     def __init__(self, name, stack, type, chan, hass):
         generated_name = DOMAIN + str(stack) + "_" + type + "_" + str(chan)
         self._unique_id = generate_entity_id("switch.{}", generated_name, hass=hass)
@@ -51,6 +49,8 @@ class Switch(SwitchEntity):
         self._icon = self._icons["off"]
         self.__SM__init()
         self._is_on = self._SM_get(self._chan)
+        ### CUSTOM_SETUP START
+        ### CUSTOM_SETUP END
 
     def __SM__init(self):
         com = SM_MAP[self._type]["com"]
@@ -59,7 +59,6 @@ class Switch(SwitchEntity):
             self._SM = self._SM(self._stack)
             self._SM_get = getattr(self._SM, com["get"])
             self._SM_set = getattr(self._SM, com["set"])
-            ### Make API compatible if channel is not used (_)
             if len(signature(self._SM_get).parameters) == 0:
                 def _aux2_SM_get(self, _):
                     return getattr(self, com["get"])()
