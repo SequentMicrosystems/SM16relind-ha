@@ -14,7 +14,7 @@ seamlessly with Home Assistant, bringing all your custom functionality into the 
 
 - [Install HACS video](https://youtu.be/Fl3lATWhQVM) for step 1.
 - [Enable I2C and Install file editor video](https://youtu.be/53Zj8NofS7k) for steps 2. and 3.
-- [Install and config card drivers video](https://youtu.be/yH2HKjm7j24) for steps 4. and 5.
+- [Install and config card drivers video](https://youtu.be/yH2HKjm7j24) for steps 4. and 5. (replace SMioplus-ha with SM16relind-ha)
 
 #### Prerequirements
 
@@ -101,7 +101,7 @@ SM16relind:
 
 - Only specific entities for different stack levels:
 
-> The following example is provided for illustrative purposes only and does not necessarily represent real entities.
+> !The following example is provided for illustrative purposes only and does NOT necessarily represent real entities!
 
 ```yaml
 SM16relind:
@@ -112,7 +112,7 @@ SM16relind:
         update_interval: 0.1
     - stack: 2
       relay:
-        chan_range: "1..8"
+        channels: "1,2,5"
       opto_cnt:
         chan_range: "2..6"
         update_interval: 1
@@ -124,10 +124,20 @@ SM16relind:
 ### `configuration.yaml` entities
 
 Possible entities:
-```
+```yaml
 relay_1: -> relay_16:  (type: switch)
 ```
 
 Entity options:
+- `channels: "l,i,s,t"` (comma separated channel numbers)
 - `chan_range: "start..end"` (specify inclusive channel range)
-- `update_interval: seconds` (specify the update interval for `sensor` and `binary_sensor`, default 30s)
+- `update_interval: seconds` (specify the update interval for `sensor` and `binary_sensor`, default **30s**)
+- `update_interval: seconds` (specify the update interval for `datetime`(RTC), default **1s**)
+- `internet_sync_interval: seconds` (specify the internet sync interval for `datetime`(RTC), default **60s**)
+
+
+
+### Troubleshooting:
+
+1. Enities show up in the overview but do not function correctly
+    - Make sure the I2C was enabled correctly. You can check if I2C was initialized properly by running the HassOS I2C Configurator again and checking the logs.
