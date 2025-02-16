@@ -8,7 +8,6 @@ import time
 import types
 import inspect
 from inspect import signature
-import asyncio  # Add this import at top with other imports
 
 from homeassistant.const import (
 	CONF_NAME
@@ -88,31 +87,17 @@ class Switch(SwitchEntity):
                     return _SM_set(self._stack, *args)
                 self._SM_set = _aux_SM_set
 
-    async def update(self):
+    def update(self):
+        #time.sleep(self._short_timeout)
         try:
-            # Run the sync hardware access in a thread pool
-            self._is_on = await asyncio.to_thread(self._SM_get, self._chan)
+            self._is_on = self._SM_get(self._chan)
         except Exception as ex:
-            _LOGGER.error(DOMAIN + " %s update() failed, %e, %s, %s", 
-                         self._type, ex, str(self._stack), str(self._chan))
+            _LOGGER.error(DOMAIN + " %s update() failed, %e, %s, %s", self._type, ex, str(self._stack), str(self._chan))
             return
-        
         if self._is_on:
             self._icon = self._icons["on"]
         else:
             self._icon = self._icons["off"]
-
-    async def turn_on(self, **kwargs):
-        try:
-            await asyncio.to_thread(self._SM_set, self._chan, 1)
-        except Exception as ex:
-            _LOGGER.error(DOMAIN + " %s turn ON failed, %e", self._type, ex)
-
-    async def turn_off(self, **kwargs):
-        try:
-            await asyncio.to_thread(self._SM_set, self._chan, 0)
-        except Exception as ex:
-            _LOGGER.error(DOMAIN + " %s turn OFF failed, %e", self._type, ex)
 
     @property
     def unique_id(self):
@@ -129,3 +114,15 @@ class Switch(SwitchEntity):
     @property
     def is_on(self):
         return self._is_on
+
+    def turn_on(self, **kwargs):
+        try:
+            self._SM_set(self._chan, 1)
+        except Exception as ex:
+            _LOGGER.error(DOMAIN + " %s turn ON failed, %e", self._type, ex)
+
+    def turn_off(self, **kwargs):
+        try:
+            self._SM_set(self._chan, 0)
+        except Exception as ex:
+            _LOGGER.error(DOMAIN + " %s turn OFF failed, %e", self._type, ex);
